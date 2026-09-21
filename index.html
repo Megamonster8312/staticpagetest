@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>easyporn - Loading</title>
+  <title>easyporn - Video Portal</title>
   <style>
     :root {
       --bg: #0f0f0f;
+      --card-bg: #181818;
       --nav-bg: #0f0f0f;
       --border: #272727;
       --skeleton-base: #202020;
       --skeleton-highlight: #383838;
       --text-main: #f1f1f1;
+      --text-muted: #aaaaaa;
+      --accent: #3ea6ff;
     }
 
     * {
@@ -24,6 +27,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text-main);
+      min-height: 100vh;
       overflow-x: hidden;
     }
 
@@ -46,22 +50,56 @@
       font-weight: 700;
       letter-spacing: -0.5px;
       color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Search Bar */
+    .search-container {
+      display: flex;
+      width: 45%;
+      max-width: 600px;
+    }
+
+    .search-input {
+      flex: 1;
+      height: 38px;
+      background-color: #121212;
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: 20px 0 0 20px;
+      padding: 0 1rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-btn {
+      width: 60px;
+      height: 38px;
+      background-color: #222222;
+      border: 1px solid var(--border);
+      border-radius: 0 20px 20px 0;
+      color: var(--text-main);
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
     }
 
-    .search-bar-placeholder {
-      width: 40%;
-      max-width: 600px;
-      height: 38px;
-      border-radius: 20px;
+    .search-btn:hover {
+      background-color: #2a2a2a;
     }
 
-    .user-avatar-placeholder {
+    .user-avatar {
       width: 34px;
       height: 34px;
       border-radius: 50%;
+      background-color: #333;
     }
 
     /* Layout */
@@ -70,41 +108,45 @@
       min-height: calc(100vh - 56px);
     }
 
-    /* Sidebar Placeholder */
+    /* Sidebar */
     aside {
-      width: 240px;
+      width: 220px;
       padding: 1rem 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
       border-right: 1px solid var(--border);
     }
 
-    .sidebar-item {
-      height: 40px;
+    .sidebar-link {
+      padding: 0.6rem 1rem;
       border-radius: 8px;
-      width: 100%;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.9rem;
+      cursor: pointer;
     }
 
-    /* Main Content Area */
+    .sidebar-link:hover {
+      background-color: #222;
+    }
+
+    .sidebar-link.active {
+      background-color: #272727;
+      font-weight: 600;
+    }
+
+    /* Main Area */
     main {
       flex: 1;
       padding: 1.5rem;
     }
 
-    /* Filter Pills Placeholder */
-    .filter-bar {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      overflow-x: hidden;
-    }
-
-    .filter-chip {
-      height: 32px;
-      width: 80px;
-      border-radius: 8px;
-      flex-shrink: 0;
+    .status-msg {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 1.1rem;
     }
 
     /* Video Grid */
@@ -118,13 +160,29 @@
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
     }
 
-    /* 16:9 Thumbnail Aspect Ratio */
-    .thumbnail-placeholder {
+    .video-card:hover .video-thumbnail {
+      border-radius: 0px;
+    }
+
+    .thumbnail-wrapper {
+      position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
+      background-color: #202020;
       border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: border-radius 0.2s ease;
     }
 
     .video-info {
@@ -132,33 +190,49 @@
       gap: 0.75rem;
     }
 
-    .channel-avatar-placeholder {
+    .channel-avatar {
       width: 36px;
       height: 36px;
       border-radius: 50%;
+      background-color: #333;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.85rem;
+      color: var(--text-muted);
     }
 
     .metadata-column {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.25rem;
+      overflow: hidden;
     }
 
-    .title-placeholder {
-      height: 16px;
-      border-radius: 4px;
-      width: 90%;
+    .video-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .subtitle-placeholder {
-      height: 12px;
-      border-radius: 4px;
-      width: 60%;
+    .video-channel {
+      font-size: 0.825rem;
+      color: var(--text-muted);
     }
 
-    /* Shimmer Animation */
+    .video-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Skeletons */
     .skeleton {
       background: linear-gradient(
         90deg,
@@ -179,147 +253,272 @@
       }
     }
 
-    /* Responsive adjustments */
+    .skeleton-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+    }
+
+    .skeleton-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .skeleton-title {
+      height: 16px;
+      border-radius: 4px;
+      width: 85%;
+    }
+
+    .skeleton-subtitle {
+      height: 12px;
+      border-radius: 4px;
+      width: 55%;
+      margin-top: 4px;
+    }
+
+    /* Embedded Video Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 900px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      position: relative;
+    }
+
+    .modal-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -36px;
+      right: 0;
+      color: #fff;
+      font-size: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
     @media (max-width: 768px) {
       aside {
         display: none;
       }
-      .search-bar-placeholder {
-        display: none;
+      .search-container {
+        width: 60%;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  <!-- Header -->
   <header>
-    <div class="brand">easyporn</div>
-    <div class="skeleton search-bar-placeholder"></div>
-    <div class="skeleton user-avatar-placeholder"></div>
+    <div class="brand" onclick="loadVideos('Trending')">easyporn</div>
+    <form class="search-container" id="search-form">
+      <input type="text" id="search-input" class="search-input" placeholder="Search YouTube..." required>
+      <button type="submit" class="search-btn" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </form>
+    <div class="user-avatar"></div>
   </header>
 
   <div class="container">
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <aside>
-      <div class="skeleton sidebar-item"></div>
-      <div class="skeleton sidebar-item"></div>
-      <div class="skeleton sidebar-item"></div>
-      <div class="skeleton sidebar-item"></div>
-      <div class="skeleton sidebar-item"></div>
+      <div class="sidebar-link active" onclick="loadVideos('Trending')">Home</div>
+      <div class="sidebar-link" onclick="loadVideos('Music')">Music</div>
+      <div class="sidebar-link" onclick="loadVideos('Gaming')">Gaming</div>
+      <div class="sidebar-link" onclick="loadVideos('News')">News</div>
+      <div class="sidebar-link" onclick="loadVideos('Technology')">Technology</div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Main Content Grid -->
     <main>
-      <!-- Filter Bar -->
-      <div class="filter-bar">
-        <div class="skeleton filter-chip" style="width: 50px;"></div>
-        <div class="skeleton filter-chip" style="width: 90px;"></div>
-        <div class="skeleton filter-chip" style="width: 70px;"></div>
-        <div class="skeleton filter-chip" style="width: 100px;"></div>
-        <div class="skeleton filter-chip" style="width: 80px;"></div>
-      </div>
-
-      <!-- Video Grid -->
-      <div class="video-grid">
-        <!-- Skeleton Card 1 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 2 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 3 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 4 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 5 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 6 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 7 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skeleton Card 8 -->
-        <div class="video-card">
-          <div class="skeleton thumbnail-placeholder"></div>
-          <div class="video-info">
-            <div class="skeleton channel-avatar-placeholder"></div>
-            <div class="metadata-column">
-              <div class="skeleton title-placeholder"></div>
-              <div class="skeleton subtitle-placeholder"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="video-grid" class="video-grid"></div>
     </main>
   </div>
 
+  <!-- Video Modal -->
+  <div id="video-modal" class="modal" onclick="closeModal(event)">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeModalDirect()">&times;</button>
+      <div id="iframe-container" style="width: 100%; height: 100%;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Replace with your YouTube Data API v3 key from Google Cloud Console
+    const YOUTUBE_API_KEY = "YOUR_API_KEY_HERE";
+    const videoGrid = document.getElementById("video-grid");
+    const searchForm = document.getElementById("search-form");
+    const searchInput = document.getElementById("search-input");
+    const videoModal = document.getElementById("video-modal");
+    const iframeContainer = document.getElementById("iframe-container");
+
+    // Display skeleton loader placeholders
+    function showSkeletons(count = 12) {
+      videoGrid.innerHTML = "";
+      for (let i = 0; i < count; i++) {
+        const card = document.createElement("div");
+        card.className = "video-card";
+        card.innerHTML = `
+          <div class="skeleton skeleton-thumb"></div>
+          <div class="video-info">
+            <div class="skeleton skeleton-avatar"></div>
+            <div class="metadata-column">
+              <div class="skeleton skeleton-title"></div>
+              <div class="skeleton skeleton-subtitle"></div>
+            </div>
+          </div>
+        `;
+        videoGrid.appendChild(card);
+      }
+    }
+
+    // Fetch videos via YouTube Data API v3
+    async function loadVideos(query = "Technology") {
+      showSkeletons(12);
+
+      if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === "YOUR_API_KEY_HERE") {
+        videoGrid.innerHTML = `
+          <div class="status-msg" style="grid-column: 1 / -1;">
+            <h3>YouTube API Key Required</h3>
+            <p style="margin-top: 0.5rem;">Please replace <code>YOUR_API_KEY_HERE</code> in the script with a valid Google Cloud YouTube Data API v3 key to enable live search and video loading.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
+
+        renderVideos(data.items);
+      } catch (error) {
+        videoGrid.innerHTML = `
+          <div class="status-msg" style="grid-column: 1 / -1;">
+            <h3>Failed to fetch videos</h3>
+            <p style="margin-top: 0.5rem; color: #ef4444;">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Render YouTube items
+    function renderVideos(items) {
+      videoGrid.innerHTML = "";
+
+      if (!items || items.length === 0) {
+        videoGrid.innerHTML = `<div class="status-msg" style="grid-column: 1 / -1;">No results found.</div>`;
+        return;
+      }
+
+      items.forEach((item) => {
+        const videoId = item.id.videoId;
+        const { title, channelTitle, publishedAt, thumbnails } = item.snippet;
+        const thumbUrl = thumbnails.high ? thumbnails.high.url : thumbnails.medium.url;
+        const uploadDate = new Date(publishedAt).toLocaleDateString();
+
+        const card = document.createElement("div");
+        card.className = "video-card";
+        card.onclick = () => openModal(videoId);
+
+        card.innerHTML = `
+          <div class="thumbnail-wrapper">
+            <img src="${thumbUrl}" alt="${escapeHtml(title)}" class="video-thumbnail" loading="lazy">
+          </div>
+          <div class="video-info">
+            <div class="channel-avatar">${channelTitle.charAt(0).toUpperCase()}</div>
+            <div class="metadata-column">
+              <div class="video-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+              <div class="video-channel">${escapeHtml(channelTitle)}</div>
+              <div class="video-date">${uploadDate}</div>
+            </div>
+          </div>
+        `;
+
+        videoGrid.appendChild(card);
+      });
+    }
+
+    // Modal player controls
+    function openModal(videoId) {
+      iframeContainer.innerHTML = `
+        <iframe 
+          src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      `;
+      videoModal.classList.add("active");
+    }
+
+    function closeModalDirect() {
+      iframeContainer.innerHTML = "";
+      videoModal.classList.remove("active");
+    }
+
+    function closeModal(event) {
+      if (event.target === videoModal) {
+        closeModalDirect();
+      }
+    }
+
+    // Utility sanitizer
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[m]));
+    }
+
+    // Form search submit
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      if (query) {
+        loadVideos(query);
+      }
+    });
+
+    // Initialize with skeleton placeholders
+    window.addEventListener("DOMContentLoaded", () => {
+      loadVideos("Trending");
+    });
+  </script>
 </body>
 </html>
