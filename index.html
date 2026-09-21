@@ -350,7 +350,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.92);
       z-index: 1000;
       justify-content: center;
       align-items: center;
@@ -374,19 +374,28 @@
       box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     }
 
+    /* Cropping viewport: scales and hides YouTube controls/title entirely */
     .video-frame-container {
       position: relative;
       flex: 1;
       width: 100%;
       height: 100%;
+      overflow: hidden;
+      background: #000;
     }
 
     #yt-player-target {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
+      pointer-events: none;
+      transform: scale(1.35);
+      transform-origin: center center;
     }
 
-    /* Overlay prevents direct interaction with YouTube's iframe context */
+    /* Transparent click surface replacing YouTube's native event target */
     .click-catcher {
       position: absolute;
       inset: 0;
@@ -400,13 +409,12 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.2), transparent);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.4), transparent);
       z-index: 3;
-      padding: 1.25rem 1rem 0.75rem 1rem;
+      padding: 1.5rem 1rem 0.75rem 1rem;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      transition: opacity 0.3s;
     }
 
     .progress-bar-container {
@@ -442,7 +450,7 @@
       background: none;
       border: none;
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -527,7 +535,6 @@
   </header>
 
   <div class="container">
-    <!-- Sidebar -->
     <aside>
       <div class="sidebar-link" onclick="loadContent('Trending')">Trending</div>
       <div class="sidebar-link" onclick="loadContent('Gaming')">Gaming</div>
@@ -535,7 +542,6 @@
       <div class="sidebar-link" onclick="loadContent('Technology')">Technology</div>
     </aside>
 
-    <!-- Main Sections -->
     <main>
       <!-- Dedicated Shorts Section -->
       <section>
@@ -564,7 +570,7 @@
         <div class="click-catcher" onclick="togglePlay()"></div>
       </div>
 
-      <!-- Completely Custom UI Controls (Original YouTube Controls are Hidden via controls=0) -->
+      <!-- Completely Custom UI Controls -->
       <div class="custom-controls">
         <div class="progress-bar-container" id="progress-container" onclick="seekVideo(event)">
           <div class="progress-filled" id="progress-filled"></div>
@@ -600,7 +606,7 @@
     let ytPlayer = null;
     let updateTimer = null;
 
-    // Age Gate Controls
+    // Age Gate Verification
     function confirmAge() {
       ageGate.style.display = "none";
       document.body.classList.remove("age-locked");
@@ -610,14 +616,14 @@
       window.location.href = "https://www.google.com";
     }
 
-    // Display skeleton loaders
+    // Skeleton Loaders
     function showSkeletons() {
       shortsGrid.innerHTML = "";
       for (let i = 0; i < 6; i++) {
         shortsGrid.innerHTML += `
           <div class="short-card">
             <div class="skeleton short-thumb-wrapper"></div>
-            <div class="skeleton" style="height: 14px; width: 80%; border-radius: 4px;"></div>
+            <div class="skeleton" style="height: 14px; width: 80%; border-radius: 4px; margin-top: 6px;"></div>
           </div>
         `;
       }
@@ -639,13 +645,11 @@
       }
     }
 
-    // Fetch Shorts and Longform items separately
+    // Load Shorts and Longform Sections
     async function loadContent(query = "Trending") {
       showSkeletons();
 
-      // Fetch Shorts (search specifically with short duration parameter)
       const shortsUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&q=${encodeURIComponent(query + " shorts")}&videoDuration=short&type=video&key=${YOUTUBE_API_KEY}`;
-      // Fetch Standard Longform videos
       const longUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&q=${encodeURIComponent(query)}&videoDuration=medium&type=video&key=${YOUTUBE_API_KEY}`;
 
       try {
@@ -656,7 +660,7 @@
         if (shortsData.items) renderShorts(shortsData.items);
         if (longData.items) renderLongform(longData.items);
       } catch (err) {
-        console.error("Failed to fetch videos:", err);
+        console.error("Failed to load content:", err);
       }
     }
 
@@ -708,7 +712,7 @@
       });
     }
 
-    // Custom YouTube IFrame Player Instance
+    // Player Operations
     function openPlayer(videoId) {
       playerModal.classList.add("active");
 
@@ -716,12 +720,13 @@
         ytPlayer = new YT.Player("yt-player-target", {
           videoId: videoId,
           playerVars: {
-            controls: 0,          // Disable default YouTube player controls
-            modestbranding: 1,    // Remove YouTube logo from bar
-            rel: 0,               // Disable related external videos
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
             showinfo: 0,
-            iv_load_policy: 3,    // Hide annotations
-            disablekb: 1          // Disable standard YouTube keyboard shortcuts
+            iv_load_policy: 3,
+            disablekb: 1,
+            fs: 0
           },
           events: {
             onReady: (event) => {
