@@ -15,6 +15,7 @@
       --text-main: #f1f1f1;
       --text-muted: #aaaaaa;
       --accent: #3ea6ff;
+      --danger: #ef4444;
     }
 
     * {
@@ -29,6 +30,94 @@
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
+    }
+
+    body.age-locked {
+      overflow: hidden;
+    }
+
+    /* 18+ Age Gate Overlay */
+    .age-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .age-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .age-badge {
+      display: inline-block;
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .age-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+
+    .age-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.75rem;
+    }
+
+    .age-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-enter {
+      background-color: var(--danger);
+      color: #fff;
+    }
+
+    .btn-enter:hover {
+      background-color: #dc2626;
+    }
+
+    .btn-exit {
+      background-color: #272727;
+      color: var(--text-muted);
+    }
+
+    .btn-exit:hover {
+      background-color: #333;
+      color: #fff;
     }
 
     /* Top Navigation Bar */
@@ -131,11 +220,6 @@
       background-color: #222;
     }
 
-    .sidebar-link.active {
-      background-color: #272727;
-      font-weight: 600;
-    }
-
     /* Main Area */
     main {
       flex: 1;
@@ -165,10 +249,6 @@
       color: inherit;
     }
 
-    .video-card:hover .video-thumbnail {
-      border-radius: 0px;
-    }
-
     .thumbnail-wrapper {
       position: relative;
       width: 100%;
@@ -182,7 +262,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: border-radius 0.2s ease;
     }
 
     .video-info {
@@ -232,7 +311,7 @@
       color: var(--text-muted);
     }
 
-    /* Skeletons */
+    /* Skeleton Styles */
     .skeleton {
       background: linear-gradient(
         90deg,
@@ -330,7 +409,20 @@
     }
   </style>
 </head>
-<body>
+<body class="age-locked">
+
+  <!-- 18+ Warning / Verification Modal -->
+  <div id="age-gate" class="age-overlay">
+    <div class="age-card">
+      <span class="age-badge">18+ WARNING</span>
+      <h2>easyporn Platform</h2>
+      <p>This platform contains material intended strictly for adults aged 18 and older. By entering, you confirm that you are at least 18 years of age.</p>
+      <div class="age-actions">
+        <button class="btn btn-enter" onclick="confirmAge()">I am 18 or older</button>
+        <button class="btn btn-exit" onclick="exitSite()">Exit</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Header -->
   <header>
@@ -350,14 +442,14 @@
   <div class="container">
     <!-- Sidebar -->
     <aside>
-      <div class="sidebar-link active" onclick="loadVideos('Trending')">Home</div>
+      <div class="sidebar-link" onclick="loadVideos('Trending')">Trending</div>
       <div class="sidebar-link" onclick="loadVideos('Music')">Music</div>
       <div class="sidebar-link" onclick="loadVideos('Gaming')">Gaming</div>
       <div class="sidebar-link" onclick="loadVideos('News')">News</div>
       <div class="sidebar-link" onclick="loadVideos('Technology')">Technology</div>
     </aside>
 
-    <!-- Main Content Grid -->
+    <!-- Video Grid -->
     <main>
       <div id="video-grid" class="video-grid"></div>
     </main>
@@ -372,13 +464,24 @@
   </div>
 
   <script>
-    // Replace with your YouTube Data API v3 key from Google Cloud Console
     const YOUTUBE_API_KEY = "AIzaSyAr0V7O1_to8NhOQJZNk65wIGJDOlQl2SQ";
+
     const videoGrid = document.getElementById("video-grid");
     const searchForm = document.getElementById("search-form");
     const searchInput = document.getElementById("search-input");
     const videoModal = document.getElementById("video-modal");
     const iframeContainer = document.getElementById("iframe-container");
+    const ageGate = document.getElementById("age-gate");
+
+    // Age Gate Controls
+    function confirmAge() {
+      ageGate.style.display = "none";
+      document.body.classList.remove("age-locked");
+    }
+
+    function exitSite() {
+      window.location.href = "https://www.google.com";
+    }
 
     // Display skeleton loader placeholders
     function showSkeletons(count = 12) {
@@ -401,18 +504,8 @@
     }
 
     // Fetch videos via YouTube Data API v3
-    async function loadVideos(query = "Technology") {
+    async function loadVideos(query = "Trending") {
       showSkeletons(12);
-
-      if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY === "YOUR_API_KEY_HERE") {
-        videoGrid.innerHTML = `
-          <div class="status-msg" style="grid-column: 1 / -1;">
-            <h3>YouTube API Key Required</h3>
-            <p style="margin-top: 0.5rem;">Please replace <code>YOUR_API_KEY_HERE</code> in the script with a valid Google Cloud YouTube Data API v3 key to enable live search and video loading.</p>
-          </div>
-        `;
-        return;
-      }
 
       const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
 
@@ -428,7 +521,7 @@
       } catch (error) {
         videoGrid.innerHTML = `
           <div class="status-msg" style="grid-column: 1 / -1;">
-            <h3>Failed to fetch videos</h3>
+            <h3>Error loading videos</h3>
             <p style="margin-top: 0.5rem; color: #ef4444;">${error.message}</p>
           </div>
         `;
@@ -495,7 +588,7 @@
       }
     }
 
-    // Utility sanitizer
+    // Sanitizer utility
     function escapeHtml(str) {
       return str.replace(/[&<>"']/g, (m) => ({
         "&": "&amp;",
@@ -515,7 +608,7 @@
       }
     });
 
-    // Initialize with skeleton placeholders
+    // Initialize with default search
     window.addEventListener("DOMContentLoaded", () => {
       loadVideos("Trending");
     });
