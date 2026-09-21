@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>easyporn - Video Portal</title>
+  <title>easyporn - Media Dashboard</title>
   <style>
     :root {
       --bg: #0f0f0f;
@@ -36,7 +36,7 @@
       overflow: hidden;
     }
 
-    /* 18+ Age Gate Overlay */
+    /* 18+ Warning Overlay */
     .age-overlay {
       position: fixed;
       inset: 0;
@@ -120,7 +120,7 @@
       color: #fff;
     }
 
-    /* Top Navigation Bar */
+    /* Top Navigation */
     header {
       position: sticky;
       top: 0;
@@ -137,13 +137,11 @@
     .brand {
       font-size: 1.25rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
       color: var(--text-main);
       cursor: pointer;
       user-select: none;
     }
 
-    /* Search Bar */
     .search-container {
       display: flex;
       width: 45%;
@@ -184,14 +182,7 @@
       background-color: #2a2a2a;
     }
 
-    .user-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background-color: #333;
-    }
-
-    /* Layout */
+    /* Main Container */
     .container {
       display: flex;
       min-height: calc(100vh - 56px);
@@ -220,36 +211,67 @@
       background-color: #222;
     }
 
-    /* Main Area */
     main {
       flex: 1;
       padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
     }
 
-    .status-msg {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--text-muted);
-      font-size: 1.1rem;
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
-    /* Video Grid */
-    .video-grid {
+    /* Shorts Grid (Vertical 9:16 Aspect Ratio) */
+    .shorts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 1rem;
+    }
+
+    .short-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .short-thumb-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background-color: #202020;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .short-thumb-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Longform Grid (Horizontal 16:9 Aspect Ratio) */
+    .longform-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem 1rem;
     }
 
-    .video-card {
+    .long-card {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       cursor: pointer;
-      text-decoration: none;
-      color: inherit;
     }
 
-    .thumbnail-wrapper {
+    .long-thumb-wrapper {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -258,7 +280,7 @@
       overflow: hidden;
     }
 
-    .video-thumbnail {
+    .long-thumb-wrapper img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -306,12 +328,7 @@
       color: var(--text-muted);
     }
 
-    .video-date {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    /* Skeleton Styles */
+    /* Skeleton Loading State */
     .skeleton {
       background: linear-gradient(
         90deg,
@@ -324,46 +341,16 @@
     }
 
     @keyframes shimmer {
-      0% {
-        background-position: 200% 0;
-      }
-      100% {
-        background-position: -200% 0;
-      }
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
-    .skeleton-thumb {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 12px;
-    }
-
-    .skeleton-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .skeleton-title {
-      height: 16px;
-      border-radius: 4px;
-      width: 85%;
-    }
-
-    .skeleton-subtitle {
-      height: 12px;
-      border-radius: 4px;
-      width: 55%;
-      margin-top: 4px;
-    }
-
-    /* Embedded Video Modal */
+    /* Custom Player Modal */
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 1000;
       justify-content: center;
       align-items: center;
@@ -374,29 +361,129 @@
       display: flex;
     }
 
-    .modal-content {
+    .custom-player-wrapper {
+      position: relative;
       width: 100%;
-      max-width: 900px;
+      max-width: 960px;
       aspect-ratio: 16 / 9;
       background: #000;
-      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     }
 
-    .modal-content iframe {
+    .video-frame-container {
+      position: relative;
+      flex: 1;
       width: 100%;
       height: 100%;
-      border: none;
     }
 
-    .close-btn {
+    #yt-player-target {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Overlay prevents direct interaction with YouTube's iframe context */
+    .click-catcher {
       position: absolute;
-      top: -36px;
+      inset: 0;
+      z-index: 2;
+      cursor: pointer;
+    }
+
+    /* Custom UI Controls Bar */
+    .custom-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
       right: 0;
-      color: #fff;
-      font-size: 24px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.2), transparent);
+      z-index: 3;
+      padding: 1.25rem 1rem 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: opacity 0.3s;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-filled {
+      height: 100%;
+      background: var(--danger);
+      width: 0%;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .controls-left, .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .ctrl-btn {
       background: none;
       border: none;
+      color: #fff;
+      font-size: 1rem;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ctrl-btn:hover {
+      color: var(--accent);
+    }
+
+    .time-display {
+      font-size: 0.85rem;
+      color: #ddd;
+    }
+
+    .volume-slider {
+      width: 80px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 1.5rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .close-modal-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     @media (max-width: 768px) {
@@ -411,7 +498,7 @@
 </head>
 <body class="age-locked">
 
-  <!-- 18+ Warning / Verification Modal -->
+  <!-- Age Warning Gate -->
   <div id="age-gate" class="age-overlay">
     <div class="age-card">
       <span class="age-badge">18+ WARNING</span>
@@ -426,9 +513,9 @@
 
   <!-- Header -->
   <header>
-    <div class="brand" onclick="loadVideos('Trending')">easyporn</div>
+    <div class="brand" onclick="loadContent('Trending')">easyporn</div>
     <form class="search-container" id="search-form">
-      <input type="text" id="search-input" class="search-input" placeholder="Search YouTube..." required>
+      <input type="text" id="search-input" class="search-input" placeholder="Search..." required>
       <button type="submit" class="search-btn" aria-label="Search">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
@@ -436,42 +523,82 @@
         </svg>
       </button>
     </form>
-    <div class="user-avatar"></div>
+    <div style="width: 34px; height: 34px; border-radius: 50%; background: #333;"></div>
   </header>
 
   <div class="container">
     <!-- Sidebar -->
     <aside>
-      <div class="sidebar-link" onclick="loadVideos('Trending')">Trending</div>
-      <div class="sidebar-link" onclick="loadVideos('Music')">Music</div>
-      <div class="sidebar-link" onclick="loadVideos('Gaming')">Gaming</div>
-      <div class="sidebar-link" onclick="loadVideos('News')">News</div>
-      <div class="sidebar-link" onclick="loadVideos('Technology')">Technology</div>
+      <div class="sidebar-link" onclick="loadContent('Trending')">Trending</div>
+      <div class="sidebar-link" onclick="loadContent('Gaming')">Gaming</div>
+      <div class="sidebar-link" onclick="loadContent('Music')">Music</div>
+      <div class="sidebar-link" onclick="loadContent('Technology')">Technology</div>
     </aside>
 
-    <!-- Video Grid -->
+    <!-- Main Sections -->
     <main>
-      <div id="video-grid" class="video-grid"></div>
+      <!-- Dedicated Shorts Section -->
+      <section>
+        <div class="section-title">
+          <span>⚡ Shorts</span>
+        </div>
+        <div id="shorts-grid" class="shorts-grid"></div>
+      </section>
+
+      <!-- Longform Section -->
+      <section>
+        <div class="section-title">
+          <span>📺 Videos</span>
+        </div>
+        <div id="longform-grid" class="longform-grid"></div>
+      </section>
     </main>
   </div>
 
-  <!-- Video Modal -->
-  <div id="video-modal" class="modal" onclick="closeModal(event)">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeModalDirect()">&times;</button>
-      <div id="iframe-container" style="width: 100%; height: 100%;"></div>
+  <!-- Custom Player Modal -->
+  <div id="player-modal" class="modal">
+    <button class="close-modal-btn" onclick="closePlayer()">&times;</button>
+    <div class="custom-player-wrapper" id="player-wrapper">
+      <div class="video-frame-container">
+        <div id="yt-player-target"></div>
+        <div class="click-catcher" onclick="togglePlay()"></div>
+      </div>
+
+      <!-- Completely Custom UI Controls (Original YouTube Controls are Hidden via controls=0) -->
+      <div class="custom-controls">
+        <div class="progress-bar-container" id="progress-container" onclick="seekVideo(event)">
+          <div class="progress-filled" id="progress-filled"></div>
+        </div>
+        <div class="controls-row">
+          <div class="controls-left">
+            <button class="ctrl-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
+            <span class="time-display" id="time-display">0:00 / 0:00</span>
+          </div>
+          <div class="controls-right">
+            <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="100" oninput="changeVolume(this.value)">
+            <button class="ctrl-btn" onclick="toggleFullScreen()">⛶</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Load YouTube IFrame Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
     const YOUTUBE_API_KEY = "AIzaSyAr0V7O1_to8NhOQJZNk65wIGJDOlQl2SQ";
 
-    const videoGrid = document.getElementById("video-grid");
+    const shortsGrid = document.getElementById("shorts-grid");
+    const longformGrid = document.getElementById("longform-grid");
     const searchForm = document.getElementById("search-form");
     const searchInput = document.getElementById("search-input");
-    const videoModal = document.getElementById("video-modal");
-    const iframeContainer = document.getElementById("iframe-container");
+    const playerModal = document.getElementById("player-modal");
     const ageGate = document.getElementById("age-gate");
+
+    let ytPlayer = null;
+    let updateTimer = null;
 
     // Age Gate Controls
     function confirmAge() {
@@ -483,60 +610,78 @@
       window.location.href = "https://www.google.com";
     }
 
-    // Display skeleton loader placeholders
-    function showSkeletons(count = 12) {
-      videoGrid.innerHTML = "";
-      for (let i = 0; i < count; i++) {
-        const card = document.createElement("div");
-        card.className = "video-card";
-        card.innerHTML = `
-          <div class="skeleton skeleton-thumb"></div>
-          <div class="video-info">
-            <div class="skeleton skeleton-avatar"></div>
-            <div class="metadata-column">
-              <div class="skeleton skeleton-title"></div>
-              <div class="skeleton skeleton-subtitle"></div>
+    // Display skeleton loaders
+    function showSkeletons() {
+      shortsGrid.innerHTML = "";
+      for (let i = 0; i < 6; i++) {
+        shortsGrid.innerHTML += `
+          <div class="short-card">
+            <div class="skeleton short-thumb-wrapper"></div>
+            <div class="skeleton" style="height: 14px; width: 80%; border-radius: 4px;"></div>
+          </div>
+        `;
+      }
+
+      longformGrid.innerHTML = "";
+      for (let i = 0; i < 8; i++) {
+        longformGrid.innerHTML += `
+          <div class="long-card">
+            <div class="skeleton long-thumb-wrapper"></div>
+            <div class="video-info">
+              <div class="skeleton channel-avatar"></div>
+              <div class="metadata-column">
+                <div class="skeleton" style="height: 16px; width: 90%; border-radius: 4px;"></div>
+                <div class="skeleton" style="height: 12px; width: 50%; border-radius: 4px;"></div>
+              </div>
             </div>
           </div>
         `;
-        videoGrid.appendChild(card);
       }
     }
 
-    // Fetch videos via YouTube Data API v3
-    async function loadVideos(query = "Trending") {
-      showSkeletons(12);
+    // Fetch Shorts and Longform items separately
+    async function loadContent(query = "Trending") {
+      showSkeletons();
 
-      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`;
+      // Fetch Shorts (search specifically with short duration parameter)
+      const shortsUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&q=${encodeURIComponent(query + " shorts")}&videoDuration=short&type=video&key=${YOUTUBE_API_KEY}`;
+      // Fetch Standard Longform videos
+      const longUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&q=${encodeURIComponent(query)}&videoDuration=medium&type=video&key=${YOUTUBE_API_KEY}`;
 
       try {
-        const response = await fetch(url);
-        const data = await response.json();
+        const [shortsRes, longRes] = await Promise.all([fetch(shortsUrl), fetch(longUrl)]);
+        const shortsData = await shortsRes.json();
+        const longData = await longRes.json();
 
-        if (data.error) {
-          throw new Error(data.error.message);
-        }
-
-        renderVideos(data.items);
-      } catch (error) {
-        videoGrid.innerHTML = `
-          <div class="status-msg" style="grid-column: 1 / -1;">
-            <h3>Error loading videos</h3>
-            <p style="margin-top: 0.5rem; color: #ef4444;">${error.message}</p>
-          </div>
-        `;
+        if (shortsData.items) renderShorts(shortsData.items);
+        if (longData.items) renderLongform(longData.items);
+      } catch (err) {
+        console.error("Failed to fetch videos:", err);
       }
     }
 
-    // Render YouTube items
-    function renderVideos(items) {
-      videoGrid.innerHTML = "";
+    function renderShorts(items) {
+      shortsGrid.innerHTML = "";
+      items.forEach((item) => {
+        const videoId = item.id.videoId;
+        const { title, thumbnails } = item.snippet;
+        const thumbUrl = thumbnails.high ? thumbnails.high.url : thumbnails.medium.url;
 
-      if (!items || items.length === 0) {
-        videoGrid.innerHTML = `<div class="status-msg" style="grid-column: 1 / -1;">No results found.</div>`;
-        return;
-      }
+        const card = document.createElement("div");
+        card.className = "short-card";
+        card.onclick = () => openPlayer(videoId);
+        card.innerHTML = `
+          <div class="short-thumb-wrapper">
+            <img src="${thumbUrl}" alt="${escapeHtml(title)}" loading="lazy">
+          </div>
+          <div class="video-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+        `;
+        shortsGrid.appendChild(card);
+      });
+    }
 
+    function renderLongform(items) {
+      longformGrid.innerHTML = "";
       items.forEach((item) => {
         const videoId = item.id.videoId;
         const { title, channelTitle, publishedAt, thumbnails } = item.snippet;
@@ -544,12 +689,11 @@
         const uploadDate = new Date(publishedAt).toLocaleDateString();
 
         const card = document.createElement("div");
-        card.className = "video-card";
-        card.onclick = () => openModal(videoId);
-
+        card.className = "long-card";
+        card.onclick = () => openPlayer(videoId);
         card.innerHTML = `
-          <div class="thumbnail-wrapper">
-            <img src="${thumbUrl}" alt="${escapeHtml(title)}" class="video-thumbnail" loading="lazy">
+          <div class="long-thumb-wrapper">
+            <img src="${thumbUrl}" alt="${escapeHtml(title)}" loading="lazy">
           </div>
           <div class="video-info">
             <div class="channel-avatar">${channelTitle.charAt(0).toUpperCase()}</div>
@@ -560,35 +704,122 @@
             </div>
           </div>
         `;
-
-        videoGrid.appendChild(card);
+        longformGrid.appendChild(card);
       });
     }
 
-    // Modal player controls
-    function openModal(videoId) {
-      iframeContainer.innerHTML = `
-        <iframe 
-          src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-          allowfullscreen>
-        </iframe>
-      `;
-      videoModal.classList.add("active");
-    }
+    // Custom YouTube IFrame Player Instance
+    function openPlayer(videoId) {
+      playerModal.classList.add("active");
 
-    function closeModalDirect() {
-      iframeContainer.innerHTML = "";
-      videoModal.classList.remove("active");
-    }
-
-    function closeModal(event) {
-      if (event.target === videoModal) {
-        closeModalDirect();
+      if (!ytPlayer) {
+        ytPlayer = new YT.Player("yt-player-target", {
+          videoId: videoId,
+          playerVars: {
+            controls: 0,          // Disable default YouTube player controls
+            modestbranding: 1,    // Remove YouTube logo from bar
+            rel: 0,               // Disable related external videos
+            showinfo: 0,
+            iv_load_policy: 3,    // Hide annotations
+            disablekb: 1          // Disable standard YouTube keyboard shortcuts
+          },
+          events: {
+            onReady: (event) => {
+              event.target.playVideo();
+              startTracker();
+            },
+            onStateChange: onPlayerStateChange
+          }
+        });
+      } else {
+        ytPlayer.loadVideoById(videoId);
+        ytPlayer.playVideo();
+        startTracker();
       }
     }
 
-    // Sanitizer utility
+    function closePlayer() {
+      if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
+        ytPlayer.stopVideo();
+      }
+      clearInterval(updateTimer);
+      playerModal.classList.remove("active");
+    }
+
+    function onPlayerStateChange(event) {
+      const playBtn = document.getElementById("play-pause-btn");
+      if (event.data === YT.PlayerState.PLAYING) {
+        playBtn.innerText = "❚❚";
+      } else {
+        playBtn.innerText = "▶";
+      }
+    }
+
+    function togglePlay() {
+      if (!ytPlayer) return;
+      const state = ytPlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+
+    function toggleMute() {
+      if (!ytPlayer) return;
+      const muteBtn = document.getElementById("mute-btn");
+      if (ytPlayer.isMuted()) {
+        ytPlayer.unMute();
+        muteBtn.innerText = "🔊";
+      } else {
+        ytPlayer.mute();
+        muteBtn.innerText = "🔇";
+      }
+    }
+
+    function changeVolume(val) {
+      if (!ytPlayer) return;
+      ytPlayer.setVolume(val);
+      if (ytPlayer.isMuted()) ytPlayer.unMute();
+    }
+
+    function seekVideo(e) {
+      if (!ytPlayer) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      const duration = ytPlayer.getDuration();
+      ytPlayer.seekTo(pos * duration, true);
+    }
+
+    function startTracker() {
+      clearInterval(updateTimer);
+      updateTimer = setInterval(() => {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== "function") return;
+        const current = ytPlayer.getCurrentTime() || 0;
+        const duration = ytPlayer.getDuration() || 0;
+        if (duration > 0) {
+          const pct = (current / duration) * 100;
+          document.getElementById("progress-filled").style.width = pct + "%";
+          document.getElementById("time-display").innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+        }
+      }, 500);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? "0" : ""}${s}`;
+    }
+
+    function toggleFullScreen() {
+      const wrapper = document.getElementById("player-wrapper");
+      if (!document.fullscreenElement) {
+        wrapper.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
     function escapeHtml(str) {
       return str.replace(/[&<>"']/g, (m) => ({
         "&": "&amp;",
@@ -599,18 +830,16 @@
       }[m]));
     }
 
-    // Form search submit
     searchForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const query = searchInput.value.trim();
       if (query) {
-        loadVideos(query);
+        loadContent(query);
       }
     });
 
-    // Initialize with default search
     window.addEventListener("DOMContentLoaded", () => {
-      loadVideos("Trending");
+      loadContent("Trending");
     });
   </script>
 </body>
