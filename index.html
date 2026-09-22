@@ -1,851 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>easyporn - Media Dashboard</title>
-  <style>
-    :root {
-      --bg: #0f0f0f;
-      --card-bg: #181818;
-      --nav-bg: #0f0f0f;
-      --border: #272727;
-      --skeleton-base: #202020;
-      --skeleton-highlight: #383838;
-      --text-main: #f1f1f1;
-      --text-muted: #aaaaaa;
-      --accent: #3ea6ff;
-      --danger: #ef4444;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body.age-locked {
-      overflow: hidden;
-    }
-
-    /* 18+ Warning Overlay */
-    .age-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-
-    .age-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      padding: 2rem;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    }
-
-    .age-badge {
-      display: inline-block;
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-      padding: 0.35rem 0.85rem;
-      border-radius: 9999px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .age-card h2 {
-      font-size: 1.6rem;
-      margin-bottom: 0.75rem;
-      color: #fff;
-    }
-
-    .age-card p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin-bottom: 1.75rem;
-    }
-
-    .age-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      border: none;
-      transition: background-color 0.2s ease;
-    }
-
-    .btn-enter {
-      background-color: var(--danger);
-      color: #fff;
-    }
-
-    .btn-enter:hover {
-      background-color: #dc2626;
-    }
-
-    .btn-exit {
-      background-color: #272727;
-      color: var(--text-muted);
-    }
-
-    .btn-exit:hover {
-      background-color: #333;
-      color: #fff;
-    }
-
-    /* Top Navigation */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 56px;
-      padding: 0 1.5rem;
-      background-color: var(--nav-bg);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-main);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .search-container {
-      display: flex;
-      width: 45%;
-      max-width: 600px;
-    }
-
-    .search-input {
-      flex: 1;
-      height: 38px;
-      background-color: #121212;
-      border: 1px solid var(--border);
-      border-right: none;
-      border-radius: 20px 0 0 20px;
-      padding: 0 1rem;
-      color: var(--text-main);
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent);
-    }
-
-    .search-btn {
-      width: 60px;
-      height: 38px;
-      background-color: #222222;
-      border: 1px solid var(--border);
-      border-radius: 0 20px 20px 0;
-      color: var(--text-main);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .search-btn:hover {
-      background-color: #2a2a2a;
-    }
-
-    /* Main Container */
-    .container {
-      display: flex;
-      min-height: calc(100vh - 56px);
-    }
-
-    /* Sidebar */
-    aside {
-      width: 220px;
-      padding: 1rem 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      border-right: 1px solid var(--border);
-    }
-
-    .sidebar-link {
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .sidebar-link:hover {
-      background-color: #222;
-    }
-
-    main {
-      flex: 1;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    /* Shorts Grid (Vertical 9:16 Aspect Ratio) */
-    .shorts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 1rem;
-    }
-
-    .short-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      cursor: pointer;
-    }
-
-    .short-thumb-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 9 / 16;
-      background-color: #202020;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .short-thumb-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* Longform Grid (Horizontal 16:9 Aspect Ratio) */
-    .longform-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem 1rem;
-    }
-
-    .long-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      cursor: pointer;
-    }
-
-    .long-thumb-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background-color: #202020;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .long-thumb-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .video-info {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .channel-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background-color: #333;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .metadata-column {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      overflow: hidden;
-    }
-
-    .video-title {
-      font-size: 0.95rem;
-      font-weight: 500;
-      line-height: 1.3;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .video-channel {
-      font-size: 0.825rem;
-      color: var(--text-muted);
-    }
-
-    /* Skeleton Loading State */
-    .skeleton {
-      background: linear-gradient(
-        90deg,
-        var(--skeleton-base) 25%,
-        var(--skeleton-highlight) 50%,
-        var(--skeleton-base) 75%
-      );
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* Custom Player Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.92);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 1rem;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .custom-player-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 960px;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    }
-
-    /* Cropping viewport: scales and hides YouTube controls/title entirely */
-    .video-frame-container {
-      position: relative;
-      flex: 1;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-    }
-
-    #yt-player-target {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      transform: scale(1.35);
-      transform-origin: center center;
-    }
-
-    /* Transparent click surface replacing YouTube's native event target */
-    .click-catcher {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      cursor: pointer;
-    }
-
-    /* Custom UI Controls Bar */
-    .custom-controls {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.4), transparent);
-      z-index: 3;
-      padding: 1.5rem 1rem 0.75rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .progress-bar-container {
-      width: 100%;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .progress-filled {
-      height: 100%;
-      background: var(--danger);
-      width: 0%;
-      border-radius: 4px;
-      pointer-events: none;
-    }
-
-    .controls-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .controls-left, .controls-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .ctrl-btn {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .ctrl-btn:hover {
-      color: var(--accent);
-    }
-
-    .time-display {
-      font-size: 0.85rem;
-      color: #ddd;
-    }
-
-    .volume-slider {
-      width: 80px;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-
-    .close-modal-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1.5rem;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid var(--border);
-      color: #fff;
-      font-size: 1.5rem;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-
-    .close-modal-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    @media (max-width: 768px) {
-      aside {
-        display: none;
-      }
-      .search-container {
-        width: 60%;
-      }
-    }
-  </style>
-</head>
-<body class="age-locked">
-
-  <!-- Age Warning Gate -->
-  <div id="age-gate" class="age-overlay">
-    <div class="age-card">
-      <span class="age-badge">18+ WARNING</span>
-      <h2>easyporn Platform</h2>
-      <p>This platform contains material intended strictly for adults aged 18 and older. By entering, you confirm that you are at least 18 years of age.</p>
-      <div class="age-actions">
-        <button class="btn btn-enter" onclick="confirmAge()">I am 18 or older</button>
-        <button class="btn btn-exit" onclick="exitSite()">Exit</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Header -->
-  <header>
-    <div class="brand" onclick="loadContent('Trending')">easyporn</div>
-    <form class="search-container" id="search-form">
-      <input type="text" id="search-input" class="search-input" placeholder="Search..." required>
-      <button type="submit" class="search-btn" aria-label="Search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
-    </form>
-    <div style="width: 34px; height: 34px; border-radius: 50%; background: #333;"></div>
-  </header>
-
-  <div class="container">
-    <aside>
-      <div class="sidebar-link" onclick="loadContent('Trending')">Trending</div>
-      <div class="sidebar-link" onclick="loadContent('Gaming')">Gaming</div>
-      <div class="sidebar-link" onclick="loadContent('Music')">Music</div>
-      <div class="sidebar-link" onclick="loadContent('Technology')">Technology</div>
-    </aside>
-
-    <main>
-      <!-- Dedicated Shorts Section -->
-      <section>
-        <div class="section-title">
-          <span>⚡ Shorts</span>
-        </div>
-        <div id="shorts-grid" class="shorts-grid"></div>
-      </section>
-
-      <!-- Longform Section -->
-      <section>
-        <div class="section-title">
-          <span>📺 Videos</span>
-        </div>
-        <div id="longform-grid" class="longform-grid"></div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Custom Player Modal -->
-  <div id="player-modal" class="modal">
-    <button class="close-modal-btn" onclick="closePlayer()">&times;</button>
-    <div class="custom-player-wrapper" id="player-wrapper">
-      <div class="video-frame-container">
-        <div id="yt-player-target"></div>
-        <div class="click-catcher" onclick="togglePlay()"></div>
-      </div>
-
-      <!-- Completely Custom UI Controls -->
-      <div class="custom-controls">
-        <div class="progress-bar-container" id="progress-container" onclick="seekVideo(event)">
-          <div class="progress-filled" id="progress-filled"></div>
-        </div>
-        <div class="controls-row">
-          <div class="controls-left">
-            <button class="ctrl-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
-            <span class="time-display" id="time-display">0:00 / 0:00</span>
-          </div>
-          <div class="controls-right">
-            <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
-            <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="100" oninput="changeVolume(this.value)">
-            <button class="ctrl-btn" onclick="toggleFullScreen()">⛶</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Load YouTube IFrame Player API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-
-  <script>
-    const YOUTUBE_API_KEY = "AIzaSyAr0V7O1_to8NhOQJZNk65wIGJDOlQl2SQ";
-
-    const shortsGrid = document.getElementById("shorts-grid");
-    const longformGrid = document.getElementById("longform-grid");
-    const searchForm = document.getElementById("search-form");
-    const searchInput = document.getElementById("search-input");
-    const playerModal = document.getElementById("player-modal");
-    const ageGate = document.getElementById("age-gate");
-
-    let ytPlayer = null;
-    let updateTimer = null;
-
-    // Age Gate Verification
-    function confirmAge() {
-      ageGate.style.display = "none";
-      document.body.classList.remove("age-locked");
-    }
-
-    function exitSite() {
-      window.location.href = "https://www.google.com";
-    }
-
-    // Skeleton Loaders
-    function showSkeletons() {
-      shortsGrid.innerHTML = "";
-      for (let i = 0; i < 6; i++) {
-        shortsGrid.innerHTML += `
-          <div class="short-card">
-            <div class="skeleton short-thumb-wrapper"></div>
-            <div class="skeleton" style="height: 14px; width: 80%; border-radius: 4px; margin-top: 6px;"></div>
-          </div>
-        `;
-      }
-
-      longformGrid.innerHTML = "";
-      for (let i = 0; i < 8; i++) {
-        longformGrid.innerHTML += `
-          <div class="long-card">
-            <div class="skeleton long-thumb-wrapper"></div>
-            <div class="video-info">
-              <div class="skeleton channel-avatar"></div>
-              <div class="metadata-column">
-                <div class="skeleton" style="height: 16px; width: 90%; border-radius: 4px;"></div>
-                <div class="skeleton" style="height: 12px; width: 50%; border-radius: 4px;"></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    // Load Shorts and Longform Sections
-    async function loadContent(query = "Trending") {
-      showSkeletons();
-
-      const shortsUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&q=${encodeURIComponent(query + " shorts")}&videoDuration=short&type=video&key=${YOUTUBE_API_KEY}`;
-      const longUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&q=${encodeURIComponent(query)}&videoDuration=medium&type=video&key=${YOUTUBE_API_KEY}`;
-
-      try {
-        const [shortsRes, longRes] = await Promise.all([fetch(shortsUrl), fetch(longUrl)]);
-        const shortsData = await shortsRes.json();
-        const longData = await longRes.json();
-
-        if (shortsData.items) renderShorts(shortsData.items);
-        if (longData.items) renderLongform(longData.items);
-      } catch (err) {
-        console.error("Failed to load content:", err);
-      }
-    }
-
-    function renderShorts(items) {
-      shortsGrid.innerHTML = "";
-      items.forEach((item) => {
-        const videoId = item.id.videoId;
-        const { title, thumbnails } = item.snippet;
-        const thumbUrl = thumbnails.high ? thumbnails.high.url : thumbnails.medium.url;
-
-        const card = document.createElement("div");
-        card.className = "short-card";
-        card.onclick = () => openPlayer(videoId);
-        card.innerHTML = `
-          <div class="short-thumb-wrapper">
-            <img src="${thumbUrl}" alt="${escapeHtml(title)}" loading="lazy">
-          </div>
-          <div class="video-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
-        `;
-        shortsGrid.appendChild(card);
-      });
-    }
-
-    function renderLongform(items) {
-      longformGrid.innerHTML = "";
-      items.forEach((item) => {
-        const videoId = item.id.videoId;
-        const { title, channelTitle, publishedAt, thumbnails } = item.snippet;
-        const thumbUrl = thumbnails.high ? thumbnails.high.url : thumbnails.medium.url;
-        const uploadDate = new Date(publishedAt).toLocaleDateString();
-
-        const card = document.createElement("div");
-        card.className = "long-card";
-        card.onclick = () => openPlayer(videoId);
-        card.innerHTML = `
-          <div class="long-thumb-wrapper">
-            <img src="${thumbUrl}" alt="${escapeHtml(title)}" loading="lazy">
-          </div>
-          <div class="video-info">
-            <div class="channel-avatar">${channelTitle.charAt(0).toUpperCase()}</div>
-            <div class="metadata-column">
-              <div class="video-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
-              <div class="video-channel">${escapeHtml(channelTitle)}</div>
-              <div class="video-date">${uploadDate}</div>
-            </div>
-          </div>
-        `;
-        longformGrid.appendChild(card);
-      });
-    }
-
-    // Player Operations
-    function openPlayer(videoId) {
-      playerModal.classList.add("active");
-
-      if (!ytPlayer) {
-        ytPlayer = new YT.Player("yt-player-target", {
-          videoId: videoId,
-          playerVars: {
-            controls: 0,
-            modestbranding: 1,
-            rel: 0,
-            showinfo: 0,
-            iv_load_policy: 3,
-            disablekb: 1,
-            fs: 0
-          },
-          events: {
-            onReady: (event) => {
-              event.target.playVideo();
-              startTracker();
-            },
-            onStateChange: onPlayerStateChange
-          }
-        });
-      } else {
-        ytPlayer.loadVideoById(videoId);
-        ytPlayer.playVideo();
-        startTracker();
-      }
-    }
-
-    function closePlayer() {
-      if (ytPlayer && typeof ytPlayer.stopVideo === "function") {
-        ytPlayer.stopVideo();
-      }
-      clearInterval(updateTimer);
-      playerModal.classList.remove("active");
-    }
-
-    function onPlayerStateChange(event) {
-      const playBtn = document.getElementById("play-pause-btn");
-      if (event.data === YT.PlayerState.PLAYING) {
-        playBtn.innerText = "❚❚";
-      } else {
-        playBtn.innerText = "▶";
-      }
-    }
-
-    function togglePlay() {
-      if (!ytPlayer) return;
-      const state = ytPlayer.getPlayerState();
-      if (state === YT.PlayerState.PLAYING) {
-        ytPlayer.pauseVideo();
-      } else {
-        ytPlayer.playVideo();
-      }
-    }
-
-    function toggleMute() {
-      if (!ytPlayer) return;
-      const muteBtn = document.getElementById("mute-btn");
-      if (ytPlayer.isMuted()) {
-        ytPlayer.unMute();
-        muteBtn.innerText = "🔊";
-      } else {
-        ytPlayer.mute();
-        muteBtn.innerText = "🔇";
-      }
-    }
-
-    function changeVolume(val) {
-      if (!ytPlayer) return;
-      ytPlayer.setVolume(val);
-      if (ytPlayer.isMuted()) ytPlayer.unMute();
-    }
-
-    function seekVideo(e) {
-      if (!ytPlayer) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      const duration = ytPlayer.getDuration();
-      ytPlayer.seekTo(pos * duration, true);
-    }
-
-    function startTracker() {
-      clearInterval(updateTimer);
-      updateTimer = setInterval(() => {
-        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== "function") return;
-        const current = ytPlayer.getCurrentTime() || 0;
-        const duration = ytPlayer.getDuration() || 0;
-        if (duration > 0) {
-          const pct = (current / duration) * 100;
-          document.getElementById("progress-filled").style.width = pct + "%";
-          document.getElementById("time-display").innerText = `${formatTime(current)} / ${formatTime(duration)}`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server & Domain Configuration</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #333333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
-      }, 500);
-    }
 
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m}:${s < 10 ? "0" : ""}${s}`;
-    }
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+        }
 
-    function toggleFullScreen() {
-      const wrapper = document.getElementById("player-wrapper");
-      if (!document.fullscreenElement) {
-        wrapper.requestFullscreen().catch(err => alert(err.message));
-      } else {
-        document.exitFullscreen();
-      }
-    }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #111827;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 12px;
+        }
 
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, (m) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      }[m]));
-    }
+        .field-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
 
-    searchForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const query = searchInput.value.trim();
-      if (query) {
-        loadContent(query);
-      }
-    });
+        .field-group:last-child {
+            border-bottom: none;
+        }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      loadContent("Trending");
-    });
-  </script>
+        .label {
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+
+        .value {
+            font-family: monospace;
+            background-color: #f9fafb;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .badge-http {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-https {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Connection Details</h2>
+        
+        <div class="field-group">
+            <span class="label">Domain</span>
+            <span class="value">example</span>
+        </div>
+
+        <div class="field-group">
+            <span class="label">Port</span>
+            <span class="value">1233</span>
+        </div>
+
+        <div class="field-group">
+            <span class="label">IP Address</span>
+            <span class="value">192.168.1.100</span>
+        </div>
+
+        <div class="field-group">
+            <span class="label">Protocol Setting</span>
+            <div>
+                <span class="badge badge-http">HTTP</span>
+                <span class="badge badge-https">HTTPS</span>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <span class="label">Full URL (HTTP)</span>
+            <span class="value">http://example:1233</span>
+        </div>
+
+        <div class="field-group">
+            <span class="label">Full URL (HTTPS)</span>
+            <span class="value">https://example:1233</span>
+        </div>
+    </div>
+
 </body>
 </html>
