@@ -1,73 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Proxy Config</title>
+  <title>Proxy Worker</title>
 </head>
 <body>
+  <script type="module">
+    export default {
+      async fetch(request, env, ctx) {
+        const incomingUrl = new URL(request.url);
 
-  <script>
-    async function handleRequest(request, env, ctx) {
-      const incomingUrl = new URL(request.url);
+        // Target backend server configuration
+        const targetHost = "bravo.aspecthosting.eu";
+        const targetPort = "25833";
+        const targetProtocol = "http:"; // Using HTTPS
 
-      // Target backend server configuration
-      const targetHost = "bravo.aspecthosting.eu";
-      const targetPort = "25833";
-      const targetProtocol = "http:"; // Using HTTPS
+        const upstreamUrl = new URL(request.url);
+        upstreamUrl.protocol = targetProtocol;
+        upstreamUrl.hostname = targetHost;
+        upstreamUrl.port = targetPort;
 
-      // Upstream URL construction
-      const upstreamUrl = new URL(request.url);
-      upstreamUrl.protocol = targetProtocol;
-      upstreamUrl.hostname = targetHost;
-      upstreamUrl.port = targetPort;
+        const proxyHeaders = new Headers(request.headers);
+        proxyHeaders.set("Host", upstreamUrl.host);
 
-      // Headers configuration
-      const proxyHeaders = new Headers(request.headers);
-      proxyHeaders.set("Host", upstreamUrl.host);
+        const proxyRequest = new Request(upstreamUrl.toString(), {
+          method: request.method,
+          headers: proxyHeaders,
+          body: request.method !== "GET" && request.method !== "HEAD" ? request.body : null,
+          redirect: "manual",
+        });
 
-      // Create proxy request
-      const proxyRequest = new Request(upstreamUrl.toString(), {
-        method: request.method,
-        headers: proxyHeaders,
-        body: request.method !== "GET" && request.method !== "HEAD" ? request.body : null,
-        redirect: "manual"
-      });
+        // Cloudflare-specific fetch options
+        let response = await fetch(proxyRequest, {
+          cf: {
+            resolveOverride: "vxos.co.uk",
+          },
+        });
 
-      // Fetch options
-      let response = await fetch(proxyRequest, {
-        cf: {
-          // Cloudflare-specific fetch options
-          resolveOverride: "vxos.co.uk"
-        }
-      });
-
-      // Handle response redirects
-      if ([301, 302, 303, 307, 308].includes(response.status)) {
-        let location = response.headers.get("Location");
-        if (location) {
-          if (location.startsWith("/")) {
-            location = `${incomingUrl.origin}${location}`;
-          } else {
-            const targetHostString = `${upstreamUrl.host}`;
-            if (location.includes(targetHostString)) {
-              location = location.replace(targetHostString, incomingUrl.host);
+        // Handle response redirects
+        if ([301, 302, 303, 307, 308].includes(response.status)) {
+          let location = response.headers.get("Location");
+          if (location) {
+            if (location.startsWith("/")) {
+              location = `${incomingUrl.origin}${location}`;
+            } else {
+              const targetHostString = `${upstreamUrl.host}`;
+              if (location.includes(targetHostString)) {
+                location = location.replace(targetHostString, incomingUrl.host);
+              }
             }
+
+            const modifiedHeaders = new Headers(response.headers);
+            modifiedHeaders.set("Location", location);
+
+            return new Response(response.body, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: modifiedHeaders,
+            });
           }
-
-          const modifiedHeaders = new Headers(response.headers);
-          modifiedHeaders.set("Location", location);
-
-          return new Response(response.body, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: modifiedHeaders
-          });
         }
-      }
 
-      return response;
-    }
+        return response;
+      },
+    };
   </script>
-
 </body>
 </html>
