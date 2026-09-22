@@ -3,7 +3,7 @@ export default {
     const upstreamUrl = new URL(request.url);
     
     // Changing the target backend server configuration
-    upstreamUrl.hostname = "ptero.kvxos.co.uk";
+    upstreamUrl.hostname = "bravo.aspecthosting.eu";
     upstreamUrl.port = "25833";
     upstreamUrl.protocol = "http:"; // Using HTTPS
 
