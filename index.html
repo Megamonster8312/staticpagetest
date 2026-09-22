@@ -1,125 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server & Domain Configuration</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f8;
-            color: #333333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            padding: 24px;
-        }
-
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 1.25rem;
-            color: #111827;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 12px;
-        }
-
-        .field-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .field-group:last-child {
-            border-bottom: none;
-        }
-
-        .label {
-            font-weight: 600;
-            color: #4b5563;
-            font-size: 0.95rem;
-        }
-
-        .value {
-            font-family: monospace;
-            background-color: #f9fafb;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid #e5e7eb;
-            color: #1f2937;
-            font-size: 0.95rem;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 4px;
-        }
-
-        .badge-http {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-https {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Proxy Config</title>
 </head>
 <body>
 
-    <div class="card">
-        <h2>Connection Details</h2>
-        
-        <div class="field-group">
-            <span class="label">Domain</span>
-            <span class="value">example</span>
-        </div>
+  <script>
+    async function handleRequest(request, env, ctx) {
+      const incomingUrl = new URL(request.url);
 
-        <div class="field-group">
-            <span class="label">Port</span>
-            <span class="value">1233</span>
-        </div>
+      // Target backend server configuration
+      const targetHost = "bravo.aspecthosting.eu";
+      const targetPort = "25833";
+      const targetProtocol = "http:"; // Using HTTPS
 
-        <div class="field-group">
-            <span class="label">IP Address</span>
-            <span class="value">192.168.1.100</span>
-        </div>
+      // Upstream URL construction
+      const upstreamUrl = new URL(request.url);
+      upstreamUrl.protocol = targetProtocol;
+      upstreamUrl.hostname = targetHost;
+      upstreamUrl.port = targetPort;
 
-        <div class="field-group">
-            <span class="label">Protocol Setting</span>
-            <div>
-                <span class="badge badge-http">HTTP</span>
-                <span class="badge badge-https">HTTPS</span>
-            </div>
-        </div>
+      // Headers configuration
+      const proxyHeaders = new Headers(request.headers);
+      proxyHeaders.set("Host", upstreamUrl.host);
 
-        <div class="field-group">
-            <span class="label">Full URL (HTTP)</span>
-            <span class="value">http://example:1233</span>
-        </div>
+      // Create proxy request
+      const proxyRequest = new Request(upstreamUrl.toString(), {
+        method: request.method,
+        headers: proxyHeaders,
+        body: request.method !== "GET" && request.method !== "HEAD" ? request.body : null,
+        redirect: "manual"
+      });
 
-        <div class="field-group">
-            <span class="label">Full URL (HTTPS)</span>
-            <span class="value">https://example:1233</span>
-        </div>
-    </div>
+      // Fetch options
+      let response = await fetch(proxyRequest, {
+        cf: {
+          // Cloudflare-specific fetch options
+          resolveOverride: "vxos.co.uk"
+        }
+      });
+
+      // Handle response redirects
+      if ([301, 302, 303, 307, 308].includes(response.status)) {
+        let location = response.headers.get("Location");
+        if (location) {
+          if (location.startsWith("/")) {
+            location = `${incomingUrl.origin}${location}`;
+          } else {
+            const targetHostString = `${upstreamUrl.host}`;
+            if (location.includes(targetHostString)) {
+              location = location.replace(targetHostString, incomingUrl.host);
+            }
+          }
+
+          const modifiedHeaders = new Headers(response.headers);
+          modifiedHeaders.set("Location", location);
+
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: modifiedHeaders
+          });
+        }
+      }
+
+      return response;
+    }
+  </script>
 
 </body>
 </html>
