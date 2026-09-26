@@ -3,8 +3,8 @@ export default {
     const upstreamUrl = new URL(request.url);
     
     // Changing the target backend server configuration
-    upstreamUrl.hostname = "bravo.aspecthosting.eu";
-    upstreamUrl.port = "25833";
+    upstreamUrl.hostname = "alpha.aspecthosting.eu";
+    upstreamUrl.port = "25750";
     upstreamUrl.protocol = "http:"; // Using HTTPS
 
     const newHeaders = new Headers(request.headers);
