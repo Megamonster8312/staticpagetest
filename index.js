@@ -3,8 +3,8 @@ export default {
     const upstreamUrl = new URL(request.url);
     
     // Changing the target backend server configuration
-    upstreamUrl.hostname = "ptero.kvxos.co.uk";
-    upstreamUrl.port = "9038";
+    upstreamUrl.hostname = "fi2.elysiannodes.uk";
+    upstreamUrl.port = "2520";
     upstreamUrl.protocol = "http:"; // Using HTTPS
 
     const newHeaders = new Headers(request.headers);
